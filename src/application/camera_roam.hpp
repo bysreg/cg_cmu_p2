@@ -37,6 +37,8 @@ private:
     Direction direction[3];
     // the current rotation
     Rotation rotation;
+
+	int roam_mode = 1; // 1 for rotating the geometry, 2 for free roam
 };
 
 } /* _462 */

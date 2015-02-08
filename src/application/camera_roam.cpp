@@ -39,7 +39,7 @@ void CameraRoamControl::set_dir( bool pressed, int index, Direction newdir )
 
 void CameraRoamControl::handle_event( const Application* app, const SDL_Event& event )
 {
-    int width, height;
+    int width, height;	
     app->get_dimension( &width, &height );
     int newidx = -1;
     Direction newdir = DZERO;
@@ -47,6 +47,21 @@ void CameraRoamControl::handle_event( const Application* app, const SDL_Event& e
 	double rs = 1.0;
 
 	const Scene::GeometryList& geoms = app->scene.geometries;
+
+	switch (event.type)
+	{
+	case SDL_KEYUP:
+		switch (event.key.keysym.sym)
+		{
+		case SDLK_r:
+			roam_mode = roam_mode == 1 ? 2 : 1;
+			break;
+		default:
+			break;
+		}
+		break;
+	}
+
     switch ( event.type )
     {
     case SDL_KEYDOWN:
@@ -76,7 +91,7 @@ void CameraRoamControl::handle_event( const Application* app, const SDL_Event& e
         case SDLK_e:
             newidx = 1;
             newdir = DPOS;
-            break;
+            break;		
         default:
             newidx = -1;
             break;
@@ -115,15 +130,25 @@ void CameraRoamControl::handle_event( const Application* app, const SDL_Event& e
 
     case SDL_MOUSEMOTION:
         if ( rotation == RPITCHYAW ) {
-			Quaternion xdir = Quaternion(Vector3::UnitY, RotationSpeed*event.motion.xrel);
-			Quaternion ydir = Quaternion(Vector3::UnitX, RotationSpeed*event.motion.yrel);
-			for (unsigned int i = 0; i < geoms.size(); i++)
+
+			if (roam_mode == 1)
 			{
-				geoms[i]->orientation = xdir*ydir*geoms[i]->orientation;
+				Quaternion xdir = Quaternion(Vector3::UnitY, RotationSpeed*event.motion.xrel);
+				Quaternion ydir = Quaternion(Vector3::UnitX, RotationSpeed*event.motion.yrel);
+				for (unsigned int i = 0; i < geoms.size(); i++)
+				{
+					geoms[i]->orientation = xdir*ydir*geoms[i]->orientation;
+				}
+			}
+			else if (roam_mode == 2)
+			{
+				camera.yaw(-RotationSpeed * event.motion.xrel);
+				camera.pitch(-RotationSpeed * event.motion.yrel);
 			}
         }
 		else if (rotation == RROLL)
 		{
+			camera.roll(RotationSpeed * event.motion.yrel);
         }
         break;
 

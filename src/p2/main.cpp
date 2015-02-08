@@ -22,8 +22,8 @@ static const GLenum LightConstants[] = {
 };
 static const size_t NUM_GL_LIGHTS = 8;
 
-static const int WIDTH = 1024;
-static const int HEIGHT = 768;
+static const int WIDTH = 800;
+static const int HEIGHT = 600;
 static const real_t FPS = 60.0;
 static const char* TITLE = "15462 Project - OpenGL";
 
@@ -243,7 +243,7 @@ int main( int argc, char* argv[] )
     else if (argc == 3)
 	cubemap_name = argv[2];
     else
-	cubemap_name = "teide";
+	cubemap_name = "stpet";
 
     // load the given scene
     if ( !load_scene( &app.scene, argv[1] ) ) {

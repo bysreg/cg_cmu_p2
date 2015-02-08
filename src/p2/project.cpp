@@ -52,8 +52,9 @@ bool GlslProject::initialize( const SceneRenderer* renderer, int width, int heig
     GLhandleARB prog;
 
     material_shader = new Shader();
-    material_shader->compile_from_file("shaders/normal_vert.glsl",
-				       "shaders/normal_frag.glsl");
+    //material_shader->compile_from_file("shaders/normal_vert.glsl", "shaders/normal_frag.glsl");
+	//material_shader->compile_from_file("shaders/example_vert.glsl", "shaders/example_frag.glsl");
+	material_shader->compile_from_file("shaders/material_vert.glsl", "shaders/material_frag.glsl");
 
     // setup the cubemap
     cubemap = Cubemap(cubemap_faces, CUBEMAP_TEXTURE_NUM);
@@ -63,9 +64,8 @@ bool GlslProject::initialize( const SceneRenderer* renderer, int width, int heig
 
     // The commented code shows how to get a cubemap into a shader. You need to make sure
     // your shader also has this variable declared, otherwise the program will not start.
-    // glUniform1iARB(err = glGetUniformLocationARB(program, "cubemap"),
-	  //   CUBEMAP_TEXTURE_NUM);
-    // assert(err != -1);
+    glUniform1iARB(err = glGetUniformLocationARB(program, "u_texture_cube"), CUBEMAP_TEXTURE_NUM);
+    assert(err != -1);
 
     return rv; // return false to indicate initialization failure.
 }
