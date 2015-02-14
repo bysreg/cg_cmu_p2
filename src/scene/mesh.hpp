@@ -24,6 +24,9 @@ struct MeshVertex
     Vector2 tex_coord;
 
 	std::vector<unsigned int> edges;
+	bool is_boundary; // true if no boundary edges
+
+	MeshVertex() : is_boundary(false) {}
 };
 
 struct MeshEdge

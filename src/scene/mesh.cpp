@@ -358,6 +358,21 @@ bool Mesh::load()
         triangles.push_back( tri );
     }
 
+	for (int i = 0; i < edges.size(); i++)
+	{
+		const MeshEdge& e = edges[i];
+		for (int j = 0; j < 2; j++)
+		{
+			MeshVertex& v = vertices[e.vertices[j]];
+			v.edges.push_back(i);
+			if (e.triangle_size == 1)
+			{
+				//mark as boundary vertex
+				v.is_boundary = true;
+			}
+		}
+	}
+
     unsigned nvertices = vertices.size();
 
     Vector3 avePos = Vector3::Zero;

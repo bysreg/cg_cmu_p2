@@ -79,9 +79,56 @@ static void first_pass(Mesh::MeshVertexList& vertices, Mesh::MeshTriangleList& t
 
 static void second_pass(Mesh::MeshVertexList& vertices, Mesh::MeshTriangleList& triangles, Mesh::MeshEdgeList& edges)
 {
+	const float v_weight_boundary = 0.75f;
+	const float a_weight_boundary = 1.0f / 0.8f;
+	const float b_weight_boundary = a_weight_boundary;	
+
 	for (int i = 0; i < vertices.size(); i++)
 	{
+		MeshVertex& v = vertices[i];
+		if (v.is_boundary || v.edges.size() == 2)
+		{
+			//boundary case
+			unsigned int a_index, b_index;
+			bool found_a = false;
 
+			for (int j = 0; j < v.edges.size(); j++)
+			{
+				const MeshEdge& e = edges[v.edges[j]];
+				if (e.triangle_size == 1)
+				{
+					if (!found_a)
+					{
+						a_index = e.vertices[0] != i ? e.vertices[0] : e.vertices[1];
+					}
+					else
+					{
+						b_index = e.vertices[0] != i ? e.vertices[0] : e.vertices[1];
+						break;
+					}
+				}
+			}
+			MeshVertex& a = vertices[a_index];
+			MeshVertex& b = vertices[b_index];
+			v.position = v_weight_boundary * v.position + a_weight_boundary * a.position + b_weight_boundary * b.position;
+		}
+		else
+		{
+			//interios case
+			const int N = v.edges.size();
+			float beta = (0.625f - pow(0.375f + 0.25f*cos(2 * PI / N), 2)) / N;
+			Vector3 sum = Vector3::Zero;
+
+			for (int j = 0; j < N; j++)
+			{
+				const MeshEdge& e = edges[v.edges[j]];
+				unsigned int u_index = e.vertices[0] != i ? e.vertices[0] : e.vertices[1];
+				const MeshVertex& u = vertices[u_index];
+				sum += u.position;
+			}
+
+			v.position = ((1 - beta * N) * v.position) + beta * (sum);
+		}
 	}
 }
 
