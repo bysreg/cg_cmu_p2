@@ -107,6 +107,9 @@ bool Mesh::load()
     typedef std::map< TriIndex, unsigned int > VertexMap;
     VertexMap vertex_map;
 
+	typedef std::map<std::pair<int, int>, unsigned int> EdgeMap;
+	EdgeMap edge_map;
+
     if ( !file.is_open() ) {
         std::cout << "Error opening file '" << filename << "' for mesh loading.\n";
         return false;
@@ -287,9 +290,13 @@ bool Mesh::load()
 
     triangles.reserve( face_list.size() );
     vertices.reserve( face_list.size() * 2 );
+	edges.reserve(face_list.size() * 2);
 
     // current vertex index, for creating new vertices
     unsigned int vert_idx_counter = 0;
+
+	// current edge index, for creating new edges
+	unsigned int edge_idx_counter = 0;
 
     for ( size_t i = 0; i < face_list.size(); ++i ) {
         const Face& face = face_list[i];
@@ -311,6 +318,43 @@ bool Mesh::load()
 
             tri.vertices[j] = rv.first->second;
         }
+
+		for (int j = 0; j < 3; j++)
+		{
+			int next = (j + 1) >= 3 ? 0 : j + 1;
+			unsigned int cur_v_idx = tri.vertices[j];
+			unsigned int next_v_idx = tri.vertices[next];
+			std::pair< EdgeMap::iterator, bool> edgemap_check_1 = edge_map.insert(std::make_pair(std::make_pair(cur_v_idx, next_v_idx), edge_idx_counter));
+			std::pair< EdgeMap::iterator, bool> edgemap_check_2 = edge_map.insert(std::make_pair(std::make_pair(next_v_idx, cur_v_idx), edge_idx_counter));
+			if (edgemap_check_1.second && edgemap_check_2.second) //  if edge that is connected by two vertices doesnt exist yet
+			{
+				MeshEdge e;
+				e.vertices[0] = cur_v_idx;
+				e.vertices[1] = next_v_idx;
+				e.triangles[0] = i;
+				e.triangle_size = 1;
+				edges.push_back(e);
+				tri.edges[j] = edgemap_check_1.first->second;
+				edge_idx_counter++;
+			}
+			else
+			{
+				unsigned int edge_index;
+				if (!edgemap_check_1.second)
+				{
+					edge_index = edgemap_check_1.first->second;					
+				}
+				else
+				{
+					edge_index = edgemap_check_2.first->second;
+				}
+				//update the triangle
+				MeshEdge& e = edges[edge_index];
+				e.triangles[1] = i;
+				e.triangle_size++;
+				tri.edges[j] = edge_index;
+			}
+		}
         triangles.push_back( tri );
     }
 
@@ -320,14 +364,14 @@ bool Mesh::load()
     unsigned sampleSize = 1000U;
     for (unsigned i = 0; i < sampleSize; i++)
     {
-	unsigned int a = rand();
-	avePos += vertices[a % nvertices].position;
+		unsigned int a = rand();
+		avePos += vertices[a % nvertices].position;
     }
     avePos /= real_t(sampleSize);
     //std::cout << avePos << std::endl;
     for (size_t i = 0; i < nvertices; i++)
     {
-	vertices[i].position -= avePos;
+		vertices[i].position -= avePos;
     }
 
     std::cout << "Successfully loaded mesh '" << filename << "'.\n";
@@ -376,14 +420,14 @@ bool Mesh::create_gl_data()
     float* vertex = &vertex_data[0];
     for ( size_t i = 0; i < vertices.size(); ++i )
     {
-	int j = 0;
+		int j = 0;
         vertices[i].tex_coord.to_array( vertex + 0 );
-	if (has_colors)
-	{
-	    //vertices[i].color.to_array(vertex + 2);
-	    j += 4;
-	}
-	vertices[i].normal.to_array( vertex + 2 + j );
+		if (has_colors)
+		{
+			//vertices[i].color.to_array(vertex + 2);
+			j += 4;
+		}
+		vertices[i].normal.to_array( vertex + 2 + j );
         vertices[i].position.to_array( vertex + 5 + j);
 
         vertex += VERTEX_SIZE + has_colors*COLOR_SIZE;

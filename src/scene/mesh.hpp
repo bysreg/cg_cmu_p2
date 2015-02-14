@@ -22,12 +22,24 @@ struct MeshVertex
     Vector3 position;
     Vector3 normal;
     Vector2 tex_coord;
+
+	std::vector<unsigned int> edges;
+};
+
+struct MeshEdge
+{
+	unsigned int vertices[2];
+	unsigned int triangles[2]; // assume all edges are shared by at most two triangles
+	unsigned int triangle_size;
 };
 
 struct MeshTriangle
 {
     // index into the vertex list of the 3 vertices
     unsigned int vertices[3];
+
+	// index into the edge list of the 3 edges
+	unsigned int edges[3];
 };
 
 /**
@@ -42,12 +54,16 @@ public:
 
     typedef std::vector< MeshTriangle > MeshTriangleList;
     typedef std::vector< MeshVertex > MeshVertexList;
+	typedef std::vector< MeshEdge > MeshEdgeList;
 
     // The list of all triangles in this model.
     MeshTriangleList triangles;
 
     // The list of all vertices in this model.
     MeshVertexList vertices;
+
+	// the list of all edges in this model
+	MeshEdgeList edges;
 
     // scene loader stores the filename of the mesh here
     std::string filename;
