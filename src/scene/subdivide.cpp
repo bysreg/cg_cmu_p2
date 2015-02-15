@@ -99,6 +99,7 @@ static void first_pass(Mesh::MeshVertexList& vertices, Mesh::MeshTriangleList& t
 	for (size_t i = 0; i < edges.size(); i++)
 	{
 		MeshVertex v;
+		v.edges.reserve(8);
 		MeshEdge& e = edges[i];
 		unsigned int a_index = e.vertices[0];
 		unsigned int b_index = e.vertices[1];
