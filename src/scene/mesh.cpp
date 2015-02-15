@@ -358,6 +358,7 @@ bool Mesh::load()
         triangles.push_back( tri );
     }
 
+	//marking boundary vertices
 	for (int i = 0; i < edges.size(); i++)
 	{
 		const MeshEdge& e = edges[i];
