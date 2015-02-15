@@ -198,7 +198,7 @@ static void second_pass(Mesh::MeshVertexList& vertices, Mesh::MeshEdgeList& edge
 		}
 		else
 		{
-			//interios case
+			//interiors case
 			const int N = v.edges.size();
 			float beta = (0.625f - pow(0.375f + 0.25f*cos(2 * PI / N), 2)) / N;
 			Vector3 sum = Vector3::Zero;
@@ -247,9 +247,12 @@ static void recreate_new_edges(Mesh::MeshVertexList& vertices, Mesh::MeshTriangl
 			int next = (j + 1) >= 3 ? 0 : j + 1;
 			unsigned int cur_v_idx = tri.vertices[j];
 			unsigned int next_v_idx = tri.vertices[next];
+			if (cur_v_idx > next_v_idx)
+			{
+				std::swap(cur_v_idx, next_v_idx);
+			}
 			std::pair< EdgeMap::iterator, bool> edgemap_check_1 = edge_map.insert(std::make_pair(std::make_pair(cur_v_idx, next_v_idx), edge_idx_counter));
-			std::pair< EdgeMap::iterator, bool> edgemap_check_2 = edge_map.insert(std::make_pair(std::make_pair(next_v_idx, cur_v_idx), edge_idx_counter));
-			if (edgemap_check_1.second && edgemap_check_2.second) //  if edge that is connected by two vertices doesnt exist yet
+			if (edgemap_check_1.second) //  if edge that is connected by two vertices doesnt exist yet
 			{
 				MeshEdge e;
 				e.vertices[0] = cur_v_idx;
@@ -263,14 +266,7 @@ static void recreate_new_edges(Mesh::MeshVertexList& vertices, Mesh::MeshTriangl
 			else
 			{
 				unsigned int edge_index;
-				if (!edgemap_check_1.second)
-				{
-					edge_index = edgemap_check_1.first->second;
-				}
-				else
-				{
-					edge_index = edgemap_check_2.first->second;
-				}
+				edge_index = edgemap_check_1.first->second;				
 				//update the triangle
 				MeshEdge& e = edges[edge_index];
 				e.triangles[1] = i;
