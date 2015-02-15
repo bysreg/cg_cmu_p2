@@ -342,6 +342,7 @@ bool Mesh::subdivide()
 	MeshEdgeList new_edges;
 	new_triangles.reserve(triangles.size() * 4);
 	new_edges.reserve(new_triangles.size() * 2);
+	vertices.reserve(vertices.size() + edges.size());
 	assemble_new_triangles(vertices, triangles, new_triangles);
 
 	first_pass(vertices, triangles, edges, new_triangles, new_edges);
