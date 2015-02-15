@@ -40,9 +40,6 @@ struct MeshTriangle
 {
     // index into the vertex list of the 3 vertices
     unsigned int vertices[3];
-
-	// index into the edge list of the 3 edges
-	unsigned int edges[3];
 };
 
 /**

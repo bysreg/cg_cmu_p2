@@ -333,8 +333,7 @@ bool Mesh::load()
 				e.vertices[1] = next_v_idx;
 				e.triangles[0] = i;
 				e.triangle_size = 1;
-				edges.push_back(e);
-				tri.edges[j] = edgemap_check_1.first->second;
+				edges.push_back(e);			
 				edge_idx_counter++;
 			}
 			else
@@ -351,8 +350,7 @@ bool Mesh::load()
 				//update the triangle
 				MeshEdge& e = edges[edge_index];
 				e.triangles[1] = i;
-				e.triangle_size++;
-				tri.edges[j] = edge_index;
+				e.triangle_size++;				
 			}
 		}
         triangles.push_back( tri );
