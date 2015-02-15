@@ -357,7 +357,7 @@ bool Mesh::load()
     }
 
 	//marking boundary vertices
-	for (int i = 0; i < edges.size(); i++)
+	for (size_t i = 0; i < edges.size(); i++)
 	{
 		const MeshEdge& e = edges[i];
 		for (int j = 0; j < 2; j++)
