@@ -30,11 +30,13 @@ namespace _462 {
 
 	static std::pair<unsigned int, unsigned int> add_new_dots(unsigned int new_vertex_index, Mesh::MeshTriangleList& new_triangles, unsigned int old_triangle_index, unsigned int& a_vertex_tri_index, unsigned int& b_vertex_tri_index)
 	{
+		bool swapped = false;
 		unsigned int new_triangle_index[] = {old_triangle_index*4, old_triangle_index*4, old_triangle_index*4 + 3};
 		unsigned int new_triangle_vertex_slot[3] = {};
 		if (a_vertex_tri_index > b_vertex_tri_index)
 		{
 			std::swap(a_vertex_tri_index, b_vertex_tri_index);
+			swapped = true;
 		}
 
 		switch (a_vertex_tri_index)
@@ -75,7 +77,10 @@ namespace _462 {
 			new_triangle.vertices[new_triangle_vertex_slot[i]] = new_vertex_index;
 		}
 
-		return std::make_pair(new_triangle_index[0], new_triangle_index[1]);
+		if (!swapped)
+			return std::make_pair(new_triangle_index[0], new_triangle_index[1]);
+		else
+			return std::make_pair(new_triangle_index[1], new_triangle_index[0]);
 	}
 
 static void first_pass(Mesh::MeshVertexList& vertices, Mesh::MeshTriangleList& triangles, Mesh::MeshEdgeList& edges, Mesh::MeshTriangleList& new_triangles, Mesh::MeshEdgeList& new_edges)
