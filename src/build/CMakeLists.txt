@@ -3,7 +3,7 @@ if(WIN32)
 endif()
 
 if(CMAKE_COMPILER_IS_GNUCXX)
-	add_definitions(-std=c++11 -Wall -Wextra -pedantic -O1 -g -march=native)
+	add_definitions(-std=c++11 -Wall -Wextra -pedantic -O3 -march=native)
 endif()
 
 if(APPLE)

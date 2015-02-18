@@ -142,7 +142,8 @@ static void first_pass(Mesh::MeshVertexList& vertices, Mesh::MeshTriangleList& t
 		else
 		{
 			//interior case
-			unsigned int c_index, d_index;
+			unsigned int c_index = 0;
+			unsigned int d_index = 0;
 			const MeshTriangle& tri_0 = triangles[e.triangles[0]];
 			const MeshTriangle& tri_1 = triangles[e.triangles[1]];
 			for (int j = 0; j < 3; j++)
@@ -211,7 +212,8 @@ static void second_pass(Mesh::MeshVertexList& vertices, Mesh::MeshEdgeList& edge
 		if (v.is_boundary || v.edges.size() == 2)
 		{
 			//boundary case
-			unsigned int a_index, b_index;
+			unsigned int a_index = 0;
+			unsigned int b_index = 0;
 			bool found_a = false;
 
 			for (size_t j = 0; j < v.edges.size(); j++)
