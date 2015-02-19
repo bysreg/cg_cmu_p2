@@ -204,12 +204,13 @@ static void second_pass(Mesh::MeshVertexList& vertices, Mesh::MeshEdgeList& edge
 {
 	const float v_weight_boundary = 0.75f;
 	const float a_weight_boundary = 1.0f / 8.0f;
-	const float b_weight_boundary = a_weight_boundary;	
+	const float b_weight_boundary = a_weight_boundary;
+	Vector3* positions = new Vector3[old_vertices_size];
 
 	for (size_t i = 0; i < old_vertices_size; i++)
 	{
 		MeshVertex& v = vertices[i];
-		if (v.is_boundary || v.edges.size() == 2)
+		if (v.is_boundary)
 		{
 			//boundary case
 			unsigned int a_index = 0;
@@ -235,7 +236,7 @@ static void second_pass(Mesh::MeshVertexList& vertices, Mesh::MeshEdgeList& edge
 			}
 			MeshVertex& a = vertices[a_index];
 			MeshVertex& b = vertices[b_index];
-			v.position = v_weight_boundary * v.position + a_weight_boundary * a.position + b_weight_boundary * b.position;
+			positions[i] = v_weight_boundary * v.position + a_weight_boundary * a.position + b_weight_boundary * b.position;
 		}
 		else
 		{
@@ -252,9 +253,16 @@ static void second_pass(Mesh::MeshVertexList& vertices, Mesh::MeshEdgeList& edge
 				sum += u.position;
 			}
 
-			v.position = ((1 - beta * N) * v.position) + beta * (sum);
+			positions[i] = ((1 - beta * N) * v.position) + beta * (sum);
 		}
 	}
+
+	for (int i = 0; i < old_vertices_size; i++)
+	{
+		vertices[i].position = positions[i];
+	}
+
+	delete[] positions;
 }
 
 static void assemble_new_triangles(Mesh::MeshVertexList& vertices, Mesh::MeshTriangleList& triangles, Mesh::MeshTriangleList& new_triangles)
@@ -353,7 +361,7 @@ bool Mesh::subdivide()
 	//
 	triangles = new_triangles;
 	edges = new_edges;
-	recreate_new_edges(vertices, triangles, edges, old_vertices_size); // fixme
+	recreate_new_edges(vertices, triangles, edges, old_vertices_size);
 	
 	compute_normals(vertices, triangles);
 	create_gl_data(); // recreate the gl data

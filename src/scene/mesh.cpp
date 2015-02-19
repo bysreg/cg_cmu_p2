@@ -462,7 +462,7 @@ bool Mesh::create_gl_data()
 void Mesh::render() const
 {
     assert( index_data.size() > 0 );
-
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     GLenum a = has_colors ? GL_T2F_C4F_N3F_V3F : GL_T2F_N3F_V3F;
     const unsigned int ss = VERTEX_SIZE + has_colors*COLOR_SIZE;
     glInterleavedArrays(a, ss*sizeof vertex_data[0], &vertex_data[0] );
