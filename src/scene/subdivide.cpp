@@ -127,20 +127,18 @@ static void first_pass(Mesh::MeshVertexList& vertices, Mesh::MeshTriangleList& t
 			std::pair<unsigned int, unsigned int> pair_new_triangle_indices = add_new_dots(new_vertices_index, new_triangles, e.triangles[0], a_vertex_tri_index, b_vertex_tri_index);
 
 			//replace this edge with av			
-			MeshEdge& e1 = new_edges[new_edges_index];
-			e1.vertices[0] = a_index;
-			e1.vertices[1] = new_vertices_index;
-			e1.triangle_size = 1;
-			e1.triangles[0] = pair_new_triangle_indices.first;			
-			++new_edges_index;
+			e.vertices[0] = a_index;
+			e.vertices[1] = new_vertices_index;
+			e.triangles[0] = pair_new_triangle_indices.first;
+			new_edges.push_back(e);
 
 			//add new edge vb			
-			MeshEdge& e2 = new_edges[new_edges_index];
-			e2.vertices[0] = new_vertices_index;
-			e2.vertices[1] = b_index;
-			e2.triangle_size = 1;
-			e2.triangles[0] = pair_new_triangle_indices.second;
-			++new_edges_index;
+			MeshEdge new_edge;
+			new_edge.vertices[0] = new_vertices_index;
+			new_edge.vertices[1] = b_index;
+			new_edge.triangle_size = 1;
+			new_edge.triangles[0] = pair_new_triangle_indices.second;
+			new_edges.push_back(new_edge);
 		}
 		else
 		{
@@ -183,22 +181,20 @@ static void first_pass(Mesh::MeshVertexList& vertices, Mesh::MeshTriangleList& t
 			std::pair<unsigned int, unsigned int> pair_new_triangle_1_indices = add_new_dots(new_vertices_index, new_triangles, e.triangles[1], a_vertex_tri_1_index, b_vertex_tri_1_index);
 
 			//replace this edge with av						
-			MeshEdge& e1 = new_edges[new_edges_index];
-			e1.vertices[0] = a_index;
-			e1.vertices[1] = new_vertices_index;
-			e1.triangles[0] = pair_new_triangle_0_indices.first;
-			e1.triangles[1] = pair_new_triangle_1_indices.first;
-			e1.triangle_size = 2;
-			++new_edges_index;
+			e.vertices[0] = a_index;
+			e.vertices[1] = new_vertices_index;
+			e.triangles[0] = pair_new_triangle_0_indices.first;
+			e.triangles[1] = pair_new_triangle_1_indices.first;
+			new_edges.push_back(e);
 
 			//add new edge vb
-			MeshEdge& e2 = new_edges[new_edges_index];
-			e2.vertices[0] = new_vertices_index;
-			e2.vertices[1] = b_index;
-			e2.triangle_size = 2;
-			e2.triangles[0] = pair_new_triangle_0_indices.second;
-			e2.triangles[1] = pair_new_triangle_1_indices.second;
-			++new_edges_index;
+			MeshEdge new_edge;
+			new_edge.vertices[0] = new_vertices_index;
+			new_edge.vertices[1] = b_index;
+			new_edge.triangle_size = 2;
+			new_edge.triangles[0] = pair_new_triangle_0_indices.second;
+			new_edge.triangles[1] = pair_new_triangle_1_indices.second;
+			new_edges.push_back(new_edge);
 		}
 		
 		++new_vertices_index;
@@ -303,7 +299,7 @@ static void recreate_new_edges(Mesh::MeshVertexList& vertices, Mesh::MeshTriangl
 			}
 			
 			//connect 
-			MeshEdge& e = new_edges[new_edges_index];
+			MeshEdge e;
 			e.vertices[0] = cur_v_idx;
 			e.vertices[1] = next_v_idx;
 
@@ -324,7 +320,7 @@ static void recreate_new_edges(Mesh::MeshVertexList& vertices, Mesh::MeshTriangl
 
 			e.triangles[1] = i;
 			e.triangle_size = 2;
-			++new_edges_index;
+			new_edges.push_back(e);			
 		}
 	}
 
@@ -358,18 +354,13 @@ bool Mesh::subdivide()
 	MeshTriangleList new_triangles;
 	MeshEdgeList new_edges;
 	new_triangles.reserve(triangles.size() * 4);
-	new_edges.reserve(new_triangles.size() * 3 + 2 * edges.size());
 	vertices.reserve(vertices.size() + edges.size());
 	assemble_new_triangles(vertices, triangles, new_triangles);
+	new_edges.reserve(new_triangles.size() * 3 + 2 * edges.size());
 
 	for (int i = 0; i < edges.size(); i++)
 	{
 		vertices.emplace_back();
-	}
-
-	for (int i = 0; i < new_triangles.size() * 3 + 2 * edges.size(); i++)
-	{
-		new_edges.emplace_back();
 	}
 
 	first_pass(vertices, triangles, edges, new_triangles, new_edges, old_vertices_size, new_edges_index);
