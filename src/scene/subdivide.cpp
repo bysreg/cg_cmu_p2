@@ -377,7 +377,7 @@ bool Mesh::subdivide()
 		vertices.emplace_back();
 	}
 
-	for (int i = 0; i < new_triangles.size() * 3 + 2 * edges.size();i++)
+	for (int i = 0; i < triangles.size() * 3 + 2 * edges.size(); i++)
 	{
 		new_edges.emplace_back();
 	}
