@@ -127,23 +127,19 @@ static void first_pass(Mesh::MeshVertexList& vertices, Mesh::MeshTriangleList& t
 			std::pair<unsigned int, unsigned int> pair_new_triangle_indices = add_new_dots(new_vertices_index, new_triangles, e.triangles[0], a_vertex_tri_index, b_vertex_tri_index);
 
 			//replace this edge with av			
-			//MeshEdge e1;
 			MeshEdge& e1 = new_edges[new_edges_index];
 			e1.triangle_size = 1;
 			e1.vertices[0] = a_index;
 			e1.vertices[1] = new_vertices_index;
 			e1.triangles[0] = pair_new_triangle_indices.first;
-			//new_edges.push_back(e1);
 			++new_edges_index;
 
 			//add new edge vb			
-			//MeshEdge new_edge;
 			MeshEdge& new_edge = new_edges[new_edges_index];
 			new_edge.vertices[0] = new_vertices_index;
 			new_edge.vertices[1] = b_index;
 			new_edge.triangle_size = 1;
 			new_edge.triangles[0] = pair_new_triangle_indices.second;
-			//new_edges.push_back(new_edge);
 			++new_edges_index;
 		}
 		else
@@ -187,25 +183,21 @@ static void first_pass(Mesh::MeshVertexList& vertices, Mesh::MeshTriangleList& t
 			std::pair<unsigned int, unsigned int> pair_new_triangle_1_indices = add_new_dots(new_vertices_index, new_triangles, e.triangles[1], a_vertex_tri_1_index, b_vertex_tri_1_index);
 
 			//replace this edge with av		
-			//MeshEdge e1;
 			MeshEdge& e1 = new_edges[new_edges_index];
 			e1.triangle_size = 2;
 			e1.vertices[0] = a_index;
 			e1.vertices[1] = new_vertices_index;
 			e1.triangles[0] = pair_new_triangle_0_indices.first;
 			e1.triangles[1] = pair_new_triangle_1_indices.first;
-			//new_edges.push_back(e1);
 			++new_edges_index;
 
 			//add new edge vb
-			//MeshEdge new_edge;
 			MeshEdge& new_edge = new_edges[new_edges_index];
 			new_edge.vertices[0] = new_vertices_index;
 			new_edge.vertices[1] = b_index;
 			new_edge.triangle_size = 2;
 			new_edge.triangles[0] = pair_new_triangle_0_indices.second;
 			new_edge.triangles[1] = pair_new_triangle_1_indices.second;
-			//new_edges.push_back(new_edge);
 			++new_edges_index;
 		}
 		
@@ -283,14 +275,12 @@ static void assemble_new_triangles(Mesh::MeshVertexList& vertices, Mesh::MeshTri
 	for (size_t i = 0; i < triangles.size(); i++)
 	{
 		const MeshTriangle& old_triangle = triangles[i];
-		for (int i = 0; i < 3; i++)
+		for (int j = 0; j < 3; j++)
 		{
-			MeshTriangle t;
-			t.vertices[0] = old_triangle.vertices[i];
-			new_triangles.push_back(t);
+			MeshTriangle& t = new_triangles[i*4 + j];
+			t.vertices[0] = old_triangle.vertices[j];			
 		}
 		//vertices for triangle index 3 all consist of new vertices from first pass
-		new_triangles.emplace_back();
 	}
 }
 
@@ -311,7 +301,6 @@ static void recreate_new_edges(Mesh::MeshVertexList& vertices, Mesh::MeshTriangl
 			}
 			
 			//connect 
-			//MeshEdge e;
 			MeshEdge& e = new_edges[new_edges_index];
 			e.vertices[0] = cur_v_idx;
 			e.vertices[1] = next_v_idx;
@@ -332,8 +321,7 @@ static void recreate_new_edges(Mesh::MeshVertexList& vertices, Mesh::MeshTriangl
 			}
 
 			e.triangles[1] = i;
-			e.triangle_size = 2;
-			//new_edges.push_back(e);			
+			e.triangle_size = 2;			
 			++new_edges_index;
 		}
 	}
@@ -365,26 +353,33 @@ bool Mesh::subdivide()
 {
 	unsigned int old_vertices_size = vertices.size();
 	unsigned int new_edges_index = 0;
+	unsigned int new_edges_size = triangles.size() * 3 + 2 * edges.size();
+	unsigned int new_triangles_size = triangles.size() * 4;
 	MeshTriangleList new_triangles;
 	MeshEdgeList new_edges;
-	new_triangles.reserve(triangles.size() * 4);
+	new_triangles.reserve(new_triangles_size);
 	vertices.reserve(vertices.size() + edges.size());
-	assemble_new_triangles(vertices, triangles, new_triangles);
-	new_edges.reserve(triangles.size() * 3 + 2 * edges.size());
+	new_edges.reserve(new_edges_size);
 
 	for (int i = 0; i < edges.size(); i++)
 	{
 		vertices.emplace_back();
 	}
 
-	for (int i = 0; i < triangles.size() * 3 + 2 * edges.size(); i++)
+	for (int i = 0; i < new_edges_size; i++)
 	{
 		new_edges.emplace_back();
 	}
 
+	for (int i = 0; i < new_triangles_size; i++)
+	{
+		new_triangles.emplace_back();
+	}
+
+	assemble_new_triangles(vertices, triangles, new_triangles);
 	first_pass(vertices, triangles, edges, new_triangles, new_edges, old_vertices_size, new_edges_index);
 	second_pass(vertices, edges, old_vertices_size);
-	//
+	
 	triangles = new_triangles;
 	edges = new_edges;
 	recreate_new_edges(vertices, triangles, edges, old_vertices_size, new_edges_index);
