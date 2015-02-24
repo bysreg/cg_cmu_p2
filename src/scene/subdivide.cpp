@@ -83,7 +83,7 @@ namespace _462 {
 			return std::make_pair(new_triangle_index[1], new_triangle_index[0]);
 	}
 
-static void first_pass(Mesh::MeshVertexList& vertices, Mesh::MeshTriangleList& triangles, Mesh::MeshEdgeList& edges, Mesh::MeshTriangleList& new_triangles, Mesh::MeshEdgeList& new_edges, unsigned int old_vertices_size)
+static void first_pass(Mesh::MeshVertexList& vertices, Mesh::MeshTriangleList& triangles, Mesh::MeshEdgeList& edges, Mesh::MeshTriangleList& new_triangles, Mesh::MeshEdgeList& new_edges, unsigned int old_vertices_size, unsigned int& new_edges_index)
 {	
 	const float a_weight_interior = 3.0f / 8.0f;
 	const float b_weight_interior = a_weight_interior;
@@ -95,7 +95,7 @@ static void first_pass(Mesh::MeshVertexList& vertices, Mesh::MeshTriangleList& t
 	unsigned int b_vertex_tri_index;
 	unsigned int a_vertex_tri_1_index;
 	unsigned int b_vertex_tri_1_index;
-	unsigned int new_vertices_index = old_vertices_size;
+	unsigned int new_vertices_index = old_vertices_size;	
 
 	for (size_t i = 0; i < edges.size(); i++)
 	{
@@ -126,19 +126,21 @@ static void first_pass(Mesh::MeshVertexList& vertices, Mesh::MeshTriangleList& t
 			v.position = a_weight_boundary * a.position + b_weight_boundary * b.position;
 			std::pair<unsigned int, unsigned int> pair_new_triangle_indices = add_new_dots(new_vertices_index, new_triangles, e.triangles[0], a_vertex_tri_index, b_vertex_tri_index);
 
-			//replace this edge with av
-			e.vertices[0] = a_index;
-			e.vertices[1] = new_vertices_index;
-			e.triangles[0] = pair_new_triangle_indices.first;
-			new_edges.push_back(e);
+			//replace this edge with av			
+			MeshEdge& e1 = new_edges[new_edges_index];
+			e1.vertices[0] = a_index;
+			e1.vertices[1] = new_vertices_index;
+			e1.triangle_size = 1;
+			e1.triangles[0] = pair_new_triangle_indices.first;			
+			++new_edges_index;
 
-			//add new edge vb
-			MeshEdge new_edge;
-			new_edge.vertices[0] = new_vertices_index;
-			new_edge.vertices[1] = b_index;
-			new_edge.triangle_size = 1;
-			new_edge.triangles[0] = pair_new_triangle_indices.second;
-			new_edges.push_back(new_edge);
+			//add new edge vb			
+			MeshEdge& e2 = new_edges[new_edges_index];
+			e2.vertices[0] = new_vertices_index;
+			e2.vertices[1] = b_index;
+			e2.triangle_size = 1;
+			e2.triangles[0] = pair_new_triangle_indices.second;
+			++new_edges_index;
 		}
 		else
 		{
@@ -180,21 +182,23 @@ static void first_pass(Mesh::MeshVertexList& vertices, Mesh::MeshTriangleList& t
 			std::pair<unsigned int, unsigned int> pair_new_triangle_0_indices = add_new_dots(new_vertices_index, new_triangles, e.triangles[0], a_vertex_tri_index, b_vertex_tri_index);
 			std::pair<unsigned int, unsigned int> pair_new_triangle_1_indices = add_new_dots(new_vertices_index, new_triangles, e.triangles[1], a_vertex_tri_1_index, b_vertex_tri_1_index);
 
-			//replace this edge with av
-			e.vertices[0] = a_index;
-			e.vertices[1] = new_vertices_index;
-			e.triangles[0] = pair_new_triangle_0_indices.first;
-			e.triangles[1] = pair_new_triangle_1_indices.first;
-			new_edges.push_back(e);
+			//replace this edge with av						
+			MeshEdge& e1 = new_edges[new_edges_index];
+			e1.vertices[0] = a_index;
+			e1.vertices[1] = new_vertices_index;
+			e1.triangles[0] = pair_new_triangle_0_indices.first;
+			e1.triangles[1] = pair_new_triangle_1_indices.first;
+			e1.triangle_size = 2;
+			++new_edges_index;
 
 			//add new edge vb
-			MeshEdge new_edge;
-			new_edge.vertices[0] = new_vertices_index;
-			new_edge.vertices[1] = b_index;
-			new_edge.triangle_size = 2;
-			new_edge.triangles[0] = pair_new_triangle_0_indices.second;
-			new_edge.triangles[1] = pair_new_triangle_1_indices.second;
-			new_edges.push_back(new_edge);
+			MeshEdge& e2 = new_edges[new_edges_index];
+			e2.vertices[0] = new_vertices_index;
+			e2.vertices[1] = b_index;
+			e2.triangle_size = 2;
+			e2.triangles[0] = pair_new_triangle_0_indices.second;
+			e2.triangles[1] = pair_new_triangle_1_indices.second;
+			++new_edges_index;
 		}
 		
 		++new_vertices_index;
@@ -282,7 +286,7 @@ static void assemble_new_triangles(Mesh::MeshVertexList& vertices, Mesh::MeshTri
 	}
 }
 
-static void recreate_new_edges(Mesh::MeshVertexList& vertices, Mesh::MeshTriangleList& new_triangles, Mesh::MeshEdgeList& new_edges, unsigned int old_vertices_size)
+static void recreate_new_edges(Mesh::MeshVertexList& vertices, Mesh::MeshTriangleList& new_triangles, Mesh::MeshEdgeList& new_edges, unsigned int old_vertices_size, unsigned int& new_edges_index)
 {
 	for (size_t i = 3; i < new_triangles.size(); i+=4) // only connect edges every four triangles
 	{
@@ -299,7 +303,7 @@ static void recreate_new_edges(Mesh::MeshVertexList& vertices, Mesh::MeshTriangl
 			}
 			
 			//connect 
-			MeshEdge e;
+			MeshEdge& e = new_edges[new_edges_index];
 			e.vertices[0] = cur_v_idx;
 			e.vertices[1] = next_v_idx;
 
@@ -320,7 +324,7 @@ static void recreate_new_edges(Mesh::MeshVertexList& vertices, Mesh::MeshTriangl
 
 			e.triangles[1] = i;
 			e.triangle_size = 2;
-			new_edges.push_back(e);			
+			++new_edges_index;
 		}
 	}
 
@@ -350,6 +354,7 @@ static void recreate_new_edges(Mesh::MeshVertexList& vertices, Mesh::MeshTriangl
 bool Mesh::subdivide()
 {
 	unsigned int old_vertices_size = vertices.size();
+	unsigned int new_edges_index = 0;
 	MeshTriangleList new_triangles;
 	MeshEdgeList new_edges;
 	new_triangles.reserve(triangles.size() * 4);
@@ -362,12 +367,17 @@ bool Mesh::subdivide()
 		vertices.emplace_back();
 	}
 
-	first_pass(vertices, triangles, edges, new_triangles, new_edges, old_vertices_size);
+	for (int i = 0; i < new_triangles.size() * 3 + 2 * edges.size(); i++)
+	{
+		new_edges.emplace_back();
+	}
+
+	first_pass(vertices, triangles, edges, new_triangles, new_edges, old_vertices_size, new_edges_index);
 	second_pass(vertices, edges, old_vertices_size);
 	//
 	triangles = new_triangles;
 	edges = new_edges;
-	recreate_new_edges(vertices, triangles, edges, old_vertices_size);
+	recreate_new_edges(vertices, triangles, edges, old_vertices_size, new_edges_index);
 	
 	compute_normals(vertices, triangles);
 	create_gl_data(); // recreate the gl data
