@@ -8,3 +8,5 @@ I implemented :
 - loop subdivision algorithm 
 - fast subdivision (6th iteration of stegosaurus in under 2 seconds)
 
+I implemented the extra credit : 
+- Fast subdivision : 6th iteration of stegosaurus in under 2 seconds

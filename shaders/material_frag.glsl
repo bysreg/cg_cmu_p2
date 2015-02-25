@@ -6,6 +6,6 @@ uniform samplerCube u_texture_cube;
 
 void main(void)
 {
-	vec3 reflect_vector = reflect(cam_dir, norm);
+	vec3 reflect_vector = reflect(normalize(cam_dir), normalize(norm));
 	gl_FragColor = textureCube(u_texture_cube, reflect_vector);
 }

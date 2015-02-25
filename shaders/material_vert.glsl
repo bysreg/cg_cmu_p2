@@ -4,8 +4,8 @@ varying vec3 color;
 
 void main(void)
 {
-	norm = normalize(gl_NormalMatrix * gl_Normal);
-	cam_dir = normalize((gl_ModelViewMatrix*gl_Vertex).xyz);
+	norm = gl_NormalMatrix * gl_Normal;
+	cam_dir = (gl_ModelViewMatrix*gl_Vertex).xyz;
 	//norm = gl_Normal.xyz;
 	//norm = normalize((gl_ModelViewProjectionMatrix * vec4(norm, 0.0)).xyz);
 	//cam_dir = normalize((gl_ProjectionMatrix * (gl_ModelViewMatrix*gl_Vertex)).xyz);
