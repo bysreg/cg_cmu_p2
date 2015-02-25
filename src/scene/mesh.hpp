@@ -26,7 +26,7 @@ struct MeshVertex
 	std::vector<unsigned int> edges;
 	bool is_boundary; // true if no boundary edges
 
-	MeshVertex() : is_boundary(false) {}
+	MeshVertex() : is_boundary(false) { edges.reserve(8); }
 };
 
 struct MeshEdge
